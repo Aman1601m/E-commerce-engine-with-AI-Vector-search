@@ -8,28 +8,42 @@ const rateLimit = require("express-rate-limit");
 dotenv.config();
 
 const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
 
-// Then connect to DB
+// Connect Database
 connectDB();
 
 const app = express();
 
+// Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 
+// Rate Limiter
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+  },
 });
 
 app.use(limiter);
 
+// Routes
 app.get("/", (req, res) => {
-  res.json({ message: "E-Commerce Engine API Running..." });
+  res.status(200).json({
+    success: true,
+    message: "E-Commerce Engine API Running...",
+  });
 });
 
+app.use("/api/auth", authRoutes);
+
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
