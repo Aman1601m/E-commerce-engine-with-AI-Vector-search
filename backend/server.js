@@ -7,6 +7,11 @@ const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 
+const connectDB = require("./config/db");
+
+// Then connect to DB
+connectDB();
+
 const app = express();
 
 app.use(express.json());
