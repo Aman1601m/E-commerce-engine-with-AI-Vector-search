@@ -9,6 +9,7 @@ dotenv.config();
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const errorHandler = require("./middleware/errorMiddleware");
 
 // Connect Database
 connectDB();
@@ -42,6 +43,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
