@@ -10,6 +10,7 @@ dotenv.config();
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
+const userRoutes = require("./routes/userRoutes");
 
 // Connect Database
 connectDB();
@@ -43,6 +44,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use(errorHandler);
 
 // Start Server
