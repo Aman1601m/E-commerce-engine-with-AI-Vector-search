@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema(
       enum: ["customer", "admin"],
       default: "customer",
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
