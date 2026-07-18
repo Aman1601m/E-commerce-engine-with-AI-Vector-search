@@ -2,28 +2,41 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
+    // ==========================
+    // Basic Information
+    // ==========================
     name: {
       type: String,
       required: [true, "Product name is required"],
       trim: true,
+      maxlength: 150,
     },
 
-    description: {
+    slug: {
       type: String,
-      required: [true, "Product description is required"],
-      trim: true,
-    },
-
-    category: {
-      type: String,
-      required: [true, "Category is required"],
+      required: true,
+      unique: true,
+      lowercase: true,
       trim: true,
       index: true,
     },
 
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     brand: {
       type: String,
-      required: [true, "Brand is required"],
+      required: true,
+      trim: true,
+      index: true,
+    },
+
+    category: {
+      type: String,
+      required: true,
       trim: true,
       index: true,
     },
@@ -36,6 +49,9 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // ==========================
+    // Pricing
+    // ==========================
     price: {
       type: Number,
       required: true,
@@ -45,12 +61,35 @@ const productSchema = new mongoose.Schema(
     discountPrice: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
+    currency: {
+      type: String,
+      default: "INR",
+      uppercase: true,
+    },
+
+    // ==========================
+    // Inventory
+    // ==========================
     stock: {
       type: Number,
-      required: true,
       default: 0,
+      min: 0,
+    },
+
+    lowStockThreshold: {
+      type: Number,
+      default: 5,
+    },
+
+    // ==========================
+    // Media
+    // ==========================
+    thumbnail: {
+      type: String,
+      default: "",
     },
 
     images: [
@@ -59,7 +98,25 @@ const productSchema = new mongoose.Schema(
       },
     ],
 
-    rating: {
+    // ==========================
+    // Search
+    // ==========================
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    embedding: {
+      type: [Number],
+      default: [],
+    },
+
+    // ==========================
+    // Ratings
+    // ==========================
+    averageRating: {
       type: Number,
       default: 0,
       min: 0,
@@ -71,20 +128,43 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    // ==========================
+    // Analytics
+    // ==========================
+    views: {
+      type: Number,
+      default: 0,
+    },
+
+    salesCount: {
+      type: Number,
+      default: 0,
+    },
+
+    // ==========================
+    // Product Status
+    // ==========================
     isActive: {
       type: Boolean,
       default: true,
     },
 
-    tags: [
-      {
-        type: String,
-      },
-    ],
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
 
-    embedding: {
-      type: [Number],
-      default: [],
+    // ==========================
+    // SEO
+    // ==========================
+    metaTitle: {
+      type: String,
+      default: "",
+    },
+
+    metaDescription: {
+      type: String,
+      default: "",
     },
   },
   {
@@ -92,11 +172,18 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+/*
+|--------------------------------------------------------------------------
+| Indexes
+|--------------------------------------------------------------------------
+*/
+
 productSchema.index({
   name: "text",
   description: "text",
-  category: "text",
   brand: "text",
+  category: "text",
+  tags: "text",
 });
 
 const Product = mongoose.model("Product", productSchema);
