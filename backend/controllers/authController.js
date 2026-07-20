@@ -214,10 +214,26 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Logout User
+const logoutUser = async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: "Logout successful. Please remove token from client.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getProfile,
   changePassword,
   updateProfile,
+  logoutUser,
 };
