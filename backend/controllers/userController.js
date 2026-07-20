@@ -104,10 +104,39 @@ const getUserById = async (req, res) => {
     });
   }
 };
+const toggleUserStatus = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.isActive = !user.isActive;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${user.isActive ? "activated" : "blocked"} successfully`,
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
-    getAllUsers,
-    getUserById,
-    updateUser,
-    deleteUser
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  toggleUserStatus,
 };
