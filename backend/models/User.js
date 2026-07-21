@@ -41,6 +41,15 @@ const userSchema = new mongoose.Schema(
     type: Boolean,
     default: true,
     },
+    loginHistory: [
+  {
+    loginTime: {
+      type: Date,
+      default: Date.now,
+    },
+      ipAddress: String,
+    },
+    ],
   },
   {
     timestamps: true,
