@@ -27,37 +27,43 @@ const userSchema = new mongoose.Schema(
       enum: ["customer", "admin"],
       default: "customer",
     },
+
     isDeleted: {
       type: Boolean,
       default: false,
     },
-    resetPasswordToken: {
-    type: String,
-    },
-    resetPasswordExpire: {
-    type: Date,
-    },
-    isActive: {
-    type: Boolean,
-    default: true,
-    },
-    loginHistory: [
-  {
-    loginTime: {
-      type: Date,
-      default: Date.now,
-    },
-      ipAddress: String,
-    },
-    ],
-  },
-  isVerified: {
-  type: Boolean,
-  default: false,
-  },
 
-  verificationToken: {
-  type: String,
+    resetPasswordToken: {
+      type: String,
+    },
+
+    resetPasswordExpire: {
+      type: Date,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    loginHistory: [
+      {
+        loginTime: {
+          type: Date,
+          default: Date.now,
+        },
+        ipAddress: String,
+      },
+    ],
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    verificationToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,

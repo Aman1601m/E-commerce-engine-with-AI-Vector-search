@@ -1,11 +1,13 @@
 const User = require("../models/User");
 
+// ==============================
 // Get All Users
+// ==============================
 const getAllUsers = async (req, res) => {
   try {
-      const users = await User.find({
-          isDeleted: false,
-      }).select("-password");
+    const users = await User.find({
+      isDeleted: false,
+    }).select("-password");
 
     res.status(200).json({
       success: true,
@@ -20,7 +22,35 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// ==============================
+// Get Single User
+// ==============================
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+
+    if (!user || user.isDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ==============================
 // Update User
+// ==============================
 const updateUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
@@ -44,7 +74,6 @@ const updateUser = async (req, res) => {
       message: "User updated successfully",
       user,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -53,7 +82,9 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Delete User
+// ==============================
+// Soft Delete User
+// ==============================
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -65,38 +96,14 @@ const deleteUser = async (req, res) => {
       });
     }
 
-      user.isDeleted = true;
-      await user.save();
+    user.isDeleted = true;
 
-      res.status(200).json({
-          success: true,
-          message: "User deleted successfully",
-      });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-// Get Single User
-const getUserById = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password");
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+    await user.save();
 
     res.status(200).json({
       success: true,
-      user,
+      message: "User deleted successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -104,6 +111,10 @@ const getUserById = async (req, res) => {
     });
   }
 };
+
+// ==============================
+// Block / Unblock User
+// ==============================
 const toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -121,59 +132,11 @@ const toggleUserStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `User ${user.isActive ? "activated" : "blocked"} successfully`,
+      message: `User ${
+        user.isActive ? "activated" : "blocked"
+      } successfully`,
       user,
     });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-const verifyEmail = async (req, res) => {
-  try {
-    const user = await User.findOne({
-      verificationToken: req.params.token,
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Invalid verification token",
-      });
-    }
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Email verified successfully",
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-const dashboard = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
-
-    res.status(200).json({
-      success: true,
-      message: "Dashboard data fetched successfully",
-      user,
-    });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -188,6 +151,4 @@ module.exports = {
   updateUser,
   deleteUser,
   toggleUserStatus,
-  verifyEmail,
-  dashboard,
 };
