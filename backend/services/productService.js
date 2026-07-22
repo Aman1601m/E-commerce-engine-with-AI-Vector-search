@@ -12,9 +12,36 @@ export const createProduct = async (productData) => {
  * Get all products
  */
 export const getAllProducts = async () => {
-  const products = await Product.find().sort({ createdAt: -1 });
+  /**
+ * Get paginated products
+ */
+export const getAllProducts = async (page = 1, limit = 10) => {
+  page = Number(page);
+  limit = Number(limit);
 
-  return products;
+  const skip = (page - 1) * limit;
+
+  const [products, totalProducts] = await Promise.all([
+    Product.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+
+    Product.countDocuments(),
+  ]);
+
+  return {
+    products,
+    pagination: {
+      totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page,
+      pageSize: limit,
+      hasNextPage: page * limit < totalProducts,
+      hasPreviousPage: page > 1,
+    },
+  };
+};
 };
 
 /**

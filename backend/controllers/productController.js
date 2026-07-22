@@ -24,15 +24,17 @@ export const createProductController = async (req, res, next) => {
 // Get All Products
 export const getAllProductsController = async (req, res, next) => {
   try {
-    const products = await getAllProducts();
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+
+    const result = await getAllProducts(page, limit);
 
     res.status(200).json({
       success: true,
-      count: products.length,
-      data: products,
+      ...result,
     });
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
