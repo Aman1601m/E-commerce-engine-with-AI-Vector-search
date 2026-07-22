@@ -164,6 +164,24 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const dashboard = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: "Dashboard data fetched successfully",
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -171,4 +189,5 @@ module.exports = {
   deleteUser,
   toggleUserStatus,
   verifyEmail,
+  dashboard,
 };
