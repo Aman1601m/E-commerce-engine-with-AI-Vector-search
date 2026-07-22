@@ -10,6 +10,7 @@ const {
   updateUser,
   deleteUser,
   toggleUserStatus,
+  verifyEmail,
 } = require("../controllers/userController");
 
 router.get("/", protect, adminOnly, getAllUsers);
@@ -21,5 +22,7 @@ router.delete("/:id", protect, adminOnly, deleteUser);
 router.get("/:id", protect, adminOnly, getUserById);
 
 router.patch("/:id/status", protect, adminOnly, toggleUserStatus);
+
+router.get("/verify-email/:token", verifyEmail);
 
 module.exports = router;
