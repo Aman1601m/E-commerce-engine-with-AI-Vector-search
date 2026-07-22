@@ -17,17 +17,14 @@ export const createProductController = async (req, res, next) => {
       data: product,
     });
   } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    next(error);
   }
 };
 
 // Get All Products
 export const getAllProductsController = async (req, res, next) => {
   try {
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-
-    const result = await getAllProducts(page, limit);
+    const result = await getAllProducts(req.query);
 
     res.status(200).json({
       success: true,
@@ -48,7 +45,7 @@ export const getProductByIdController = async (req, res, next) => {
       data: product,
     });
   } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    next(error);
   }
 };
 
@@ -63,20 +60,20 @@ export const updateProductController = async (req, res, next) => {
       data: product,
     });
   } catch (error) {
-      next(error); // Pass the error to the error handling middleware
+    next(error);
   }
 };
 
 // Delete Product
 export const deleteProductController = async (req, res, next) => {
   try {
-    const response = await deleteProduct(req.params.id);
+    const result = await deleteProduct(req.params.id);
 
     res.status(200).json({
       success: true,
-      ...response,
+      ...result,
     });
   } catch (error) {
-    next(error); // Pass the error to the error handling middleware
+    next(error);
   }
 };

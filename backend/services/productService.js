@@ -1,64 +1,92 @@
 import Product from "../models/Product.js";
+import ApiError from "../utils/ApiError.js";
 
 /**
- * Create a new product
+ * Create Product
  */
 export const createProduct = async (productData) => {
-  const product = await Product.create(productData);
-  return product;
+  return await Product.create(productData);
 };
 
 /**
- * Get all products
+ * Get Products with
+ * Pagination
+ * Filtering
  */
-export const getAllProducts = async () => {
-  /**
- * Get paginated products
- */
-export const getAllProducts = async (page = 1, limit = 10) => {
-  page = Number(page);
-  limit = Number(limit);
+export const getAllProducts = async (query) => {
+  const {
+    page = 1,
+    limit = 10,
+    category,
+    brand,
+    minPrice,
+    maxPrice,
+  } = query;
 
-  const skip = (page - 1) * limit;
+  const filter = {};
+
+  if (category) {
+    filter.category = category;
+  }
+
+  if (brand) {
+    filter.brand = brand;
+  }
+
+  if (minPrice || maxPrice) {
+    filter.price = {};
+
+    if (minPrice) {
+      filter.price.$gte = Number(minPrice);
+    }
+
+    if (maxPrice) {
+      filter.price.$lte = Number(maxPrice);
+    }
+  }
+
+  const pageNumber = Number(page);
+  const pageSize = Number(limit);
+
+  const skip = (pageNumber - 1) * pageSize;
 
   const [products, totalProducts] = await Promise.all([
-    Product.find()
+    Product.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(pageSize),
 
-    Product.countDocuments(),
+    Product.countDocuments(filter),
   ]);
 
   return {
     products,
     pagination: {
       totalProducts,
-      totalPages: Math.ceil(totalProducts / limit),
-      currentPage: page,
-      pageSize: limit,
-      hasNextPage: page * limit < totalProducts,
-      hasPreviousPage: page > 1,
+      totalPages: Math.ceil(totalProducts / pageSize),
+      currentPage: pageNumber,
+      pageSize,
+      hasNextPage: pageNumber < Math.ceil(totalProducts / pageSize),
+      hasPreviousPage: pageNumber > 1,
     },
   };
 };
-};
 
 /**
- * Get product by ID
+ * Get Product By ID
  */
 export const getProductById = async (id) => {
   const product = await Product.findById(id);
 
   if (!product) {
-    throw new Error("Product not found");
+    throw new ApiError(404, "Product not found");
   }
 
   return product;
 };
 
 /**
- * Update product
+ * Update Product
  */
 export const updateProduct = async (id, updatedData) => {
   const product = await Product.findByIdAndUpdate(id, updatedData, {
@@ -67,20 +95,20 @@ export const updateProduct = async (id, updatedData) => {
   });
 
   if (!product) {
-    throw new Error("Product not found");
+    throw new ApiError(404, "Product not found");
   }
 
   return product;
 };
 
 /**
- * Delete product
+ * Delete Product
  */
 export const deleteProduct = async (id) => {
   const product = await Product.findByIdAndDelete(id);
 
   if (!product) {
-    throw new Error("Product not found");
+    throw new ApiError(404, "Product not found");
   }
 
   return {
