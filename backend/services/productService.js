@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import ApiError from "../utils/ApiError.js";
+import buildProductQuery from "../utils/buildProductQuery.js";
 
 /**
  * Create Product
@@ -9,52 +10,24 @@ export const createProduct = async (productData) => {
 };
 
 /**
- * Get Products with
- * Pagination
- * Filtering
+ * Get Products
+ * Pagination + Filtering + Sorting
  */
 export const getAllProducts = async (query) => {
   const {
-    page = 1,
-    limit = 10,
-    category,
-    brand,
-    minPrice,
-    maxPrice,
-  } = query;
+    filter,
+    sortOption,
+    page,
+    limit,
+  } = buildProductQuery(query);
 
-  const filter = {};
-
-  if (category) {
-    filter.category = category;
-  }
-
-  if (brand) {
-    filter.brand = brand;
-  }
-
-  if (minPrice || maxPrice) {
-    filter.price = {};
-
-    if (minPrice) {
-      filter.price.$gte = Number(minPrice);
-    }
-
-    if (maxPrice) {
-      filter.price.$lte = Number(maxPrice);
-    }
-  }
-
-  const pageNumber = Number(page);
-  const pageSize = Number(limit);
-
-  const skip = (pageNumber - 1) * pageSize;
+  const skip = (page - 1) * limit;
 
   const [products, totalProducts] = await Promise.all([
     Product.find(filter)
-      .sort({ createdAt: -1 })
+      .sort(sortOption)
       .skip(skip)
-      .limit(pageSize),
+      .limit(limit),
 
     Product.countDocuments(filter),
   ]);
@@ -63,11 +36,11 @@ export const getAllProducts = async (query) => {
     products,
     pagination: {
       totalProducts,
-      totalPages: Math.ceil(totalProducts / pageSize),
-      currentPage: pageNumber,
-      pageSize,
-      hasNextPage: pageNumber < Math.ceil(totalProducts / pageSize),
-      hasPreviousPage: pageNumber > 1,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page,
+      pageSize: limit,
+      hasNextPage: page < Math.ceil(totalProducts / limit),
+      hasPreviousPage: page > 1,
     },
   };
 };
