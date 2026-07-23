@@ -2,21 +2,15 @@ import Product from "../models/Product.js";
 import ApiError from "../utils/ApiError.js";
 import buildProductQuery from "../utils/buildProductQuery.js";
 
-/**
- * Create Product
- */
 export const createProduct = async (productData) => {
   return await Product.create(productData);
 };
 
-/**
- * Get Products
- * Pagination + Filtering + Sorting
- */
 export const getAllProducts = async (query) => {
   const {
     filter,
     sortOption,
+    projection,
     page,
     limit,
   } = buildProductQuery(query);
@@ -25,6 +19,7 @@ export const getAllProducts = async (query) => {
 
   const [products, totalProducts] = await Promise.all([
     Product.find(filter)
+      .select(projection)
       .sort(sortOption)
       .skip(skip)
       .limit(limit),
@@ -45,9 +40,6 @@ export const getAllProducts = async (query) => {
   };
 };
 
-/**
- * Get Product By ID
- */
 export const getProductById = async (id) => {
   const product = await Product.findById(id);
 
@@ -58,9 +50,6 @@ export const getProductById = async (id) => {
   return product;
 };
 
-/**
- * Update Product
- */
 export const updateProduct = async (id, updatedData) => {
   const product = await Product.findByIdAndUpdate(id, updatedData, {
     new: true,
@@ -74,9 +63,6 @@ export const updateProduct = async (id, updatedData) => {
   return product;
 };
 
-/**
- * Delete Product
- */
 export const deleteProduct = async (id) => {
   const product = await Product.findByIdAndDelete(id);
 

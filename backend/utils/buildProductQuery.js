@@ -8,21 +8,22 @@ const buildProductQuery = (query) => {
     maxPrice,
     sort,
     search,
+    fields,
   } = query;
 
   const filter = {};
 
-  // Category Filter
+  // Category
   if (category) {
     filter.category = category;
   }
 
-  // Brand Filter
+  // Brand
   if (brand) {
     filter.brand = brand;
   }
 
-  // Price Filter
+  // Price
   if (minPrice || maxPrice) {
     filter.price = {};
 
@@ -35,7 +36,7 @@ const buildProductQuery = (query) => {
     }
   }
 
-  // Text Search
+  // Search
   if (search) {
     filter.$text = {
       $search: search,
@@ -43,29 +44,29 @@ const buildProductQuery = (query) => {
   }
 
   // Sorting
-  let sortOption = {};
-
-  if (search) {
-    sortOption.score = {
-      $meta: "textScore",
-    };
-  } else {
-    sortOption.createdAt = -1;
-  }
+  let sortOption = search
+    ? { score: { $meta: "textScore" } }
+    : { createdAt: -1 };
 
   if (sort) {
     const order = sort.startsWith("-") ? -1 : 1;
 
-    const field = sort.replace("-", "");
-
     sortOption = {
-      [field]: order,
+      [sort.replace("-", "")]: order,
     };
+  }
+
+  // Projection
+  let projection = "";
+
+  if (fields) {
+    projection = fields.split(",").join(" ");
   }
 
   return {
     filter,
     sortOption,
+    projection,
     page: Number(page),
     limit: Number(limit),
   };
