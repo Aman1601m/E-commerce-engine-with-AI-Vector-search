@@ -10,22 +10,16 @@ const {
   updateUser,
   deleteUser,
   toggleUserStatus,
-  verifyEmail,
-  dashboard,
 } = require("../controllers/userController");
 
 router.get("/", protect, adminOnly, getAllUsers);
+
+router.get("/:id", protect, adminOnly, getUserById);
 
 router.put("/:id", protect, adminOnly, updateUser);
 
 router.delete("/:id", protect, adminOnly, deleteUser);
 
-router.get("/:id", protect, adminOnly, getUserById);
-
-router.patch("/:id/status", protect, adminOnly, toggleUserStatus);
-
-router.get("/verify-email/:token", verifyEmail);
-
-router.get("/dashboard", protect, dashboard);
+router.put("/:id/status", protect, adminOnly, toggleUserStatus);
 
 module.exports = router;
