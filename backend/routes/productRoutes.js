@@ -8,10 +8,21 @@ import {
   deleteProductController,
 } from "../controllers/productController.js";
 
+import validate from "../middleware/validate.js";
+
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/productValidation.js";
+
 const router = express.Router();
 
 // Create Product
-router.post("/", createProductController);
+router.post(
+  "/", 
+  validate(createProductController),
+  createProductController
+);
 
 // Get All Products
 router.get("/", getAllProductsController);
@@ -20,7 +31,11 @@ router.get("/", getAllProductsController);
 router.get("/:id", getProductByIdController);
 
 // Update Product
-router.put("/:id", updateProductController);
+router.put(
+  "/:id", 
+  validate(updateProductController),
+  updateProductController
+);
 
 // Delete Product
 router.delete("/:id", deleteProductController);
