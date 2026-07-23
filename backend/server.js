@@ -8,6 +8,8 @@ import productRoutes from "./routes/productRoutes.js";
 import notfound from "./middleware/notfound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
+import authRoutes from "./routes/authRoutes.js";
+
 dotenv.config();
 
 connectDB();
@@ -18,8 +20,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/products", productRoutes);
+app.use("/api/auth", authRoutes);
+
+
 app.use(notfound);
 app.use(errorHandler);
+
 
 // Health Check Route
 app.get("/", (req, res) => {
