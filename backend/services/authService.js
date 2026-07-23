@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import ApiError from "../utils/ApiError.js";
+import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (userData) => {
   const existingUser = await User.findOne({
@@ -25,5 +26,32 @@ export const registerUser = async (userData) => {
     email: user.email,
     role: user.role,
     createdAt: user.createdAt,
+  };
+};
+
+export const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid email or password");
+  }
+
+  const token = generateToken(user._id);
+
+  return {
+    token,
+    user: {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    },
   };
 };
