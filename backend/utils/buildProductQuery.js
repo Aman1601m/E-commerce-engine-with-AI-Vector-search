@@ -7,6 +7,7 @@ const buildProductQuery = (query) => {
     minPrice,
     maxPrice,
     sort,
+    search,
   } = query;
 
   const filter = {};
@@ -34,11 +35,27 @@ const buildProductQuery = (query) => {
     }
   }
 
+  // Text Search
+  if (search) {
+    filter.$text = {
+      $search: search,
+    };
+  }
+
   // Sorting
-  let sortOption = { createdAt: -1 };
+  let sortOption = {};
+
+  if (search) {
+    sortOption.score = {
+      $meta: "textScore",
+    };
+  } else {
+    sortOption.createdAt = -1;
+  }
 
   if (sort) {
     const order = sort.startsWith("-") ? -1 : 1;
+
     const field = sort.replace("-", "");
 
     sortOption = {
