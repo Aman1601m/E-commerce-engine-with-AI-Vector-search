@@ -9,6 +9,8 @@ import {
 } from "../controllers/productController.js";
 
 import validate from "../middleware/validate.js";
+import protect from "../middleware/protect.js";
+import authorize from "../middleware/authorize.js";
 
 import {
   createProductSchema,
@@ -17,27 +19,43 @@ import {
 
 const router = express.Router();
 
-// Create Product
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+
+router.get("/", getAllProductsController);
+
+router.get("/:id", getProductByIdController);
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+
 router.post(
-  "/", 
-  validate(createProductController),
+  "/",
+  protect,
+  authorize("admin"),
+  validate(createProductSchema),
   createProductController
 );
 
-// Get All Products
-router.get("/", getAllProductsController);
-
-// Get Product By ID
-router.get("/:id", getProductByIdController);
-
-// Update Product
 router.put(
-  "/:id", 
-  validate(updateProductController),
+  "/:id",
+  protect,
+  authorize("admin"),
+  validate(updateProductSchema),
   updateProductController
 );
 
-// Delete Product
-router.delete("/:id", deleteProductController);
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  deleteProductController
+);
 
 export default router;
