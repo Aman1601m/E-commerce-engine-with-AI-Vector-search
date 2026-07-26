@@ -1,3 +1,3 @@
-const API_BASE_URL = "http://localhost:8080/api";
+import { getProducts } from "../services/api";
 
-export default API_BASE_URL;
+const products = getProducts();
