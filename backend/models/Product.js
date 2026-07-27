@@ -110,7 +110,8 @@ const productSchema = new mongoose.Schema(
 
     embedding: {
       type: [Number],
-      default: [],
+      default: undefined,
+      select: false,
     },
 
     // ==========================

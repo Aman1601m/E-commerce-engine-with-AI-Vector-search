@@ -10,13 +10,27 @@ import {
   invalidateProductCache,
 } from "../utils/productCache.js";
 
+import {
+  generateProductEmbedding,
+
+} from "./embeddingService.js";
+
+import dotenv from "dotenv";
+
+dotenv.config();
+
 const PRODUCT_CACHE_TTL = 300;
 
 /**
  * Create Product
  */
 export const createProduct = async (productData) => {
-  const product = await Product.create(productData);
+  const embedding = await generateProductEmbedding(productData);
+
+  const product = await Product.create({
+    ...productData,
+    embedding,
+  });
 
   await invalidateProductCache();
 
