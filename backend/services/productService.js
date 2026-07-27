@@ -1,8 +1,14 @@
 import Product from "../models/Product.js";
+
 import ApiError from "../utils/ApiError.js";
 import buildProductQuery from "../utils/buildProductQuery.js";
+
 import redisClient from "../config/redis.js";
-import { buildProductCacheKey } from "../utils/productCache.js";
+
+import {
+  buildProductCacheKey,
+  invalidateProductCache,
+} from "../utils/productCache.js";
 
 const PRODUCT_CACHE_TTL = 300;
 
@@ -10,26 +16,30 @@ const PRODUCT_CACHE_TTL = 300;
  * Create Product
  */
 export const createProduct = async (productData) => {
-  return await Product.create(productData);
+  const product = await Product.create(productData);
+
+  await invalidateProductCache();
+
+  return product;
 };
 
 /**
- * Get Products
+ * Get All Products
  *
- * Supports:
- * - Redis caching
- * - Pagination
- * - Filtering
- * - Sorting
- * - Search
- * - Field selection
+ * Cache-Aside Pattern:
+ *
+ * 1. Check Redis
+ * 2. HIT  -> return cached result
+ * 3. MISS -> query MongoDB
+ * 4. Store result in Redis
+ * 5. Return result
  */
 export const getAllProducts = async (query) => {
   const cacheKey = buildProductCacheKey(query);
 
   /*
   |--------------------------------------------------------------------------
-  | 1. Check Redis
+  | Check Redis
   |--------------------------------------------------------------------------
   */
 
@@ -50,7 +60,7 @@ export const getAllProducts = async (query) => {
 
   /*
   |--------------------------------------------------------------------------
-  | 2. Build MongoDB Query
+  | Build MongoDB Query
   |--------------------------------------------------------------------------
   */
 
@@ -66,7 +76,7 @@ export const getAllProducts = async (query) => {
 
   /*
   |--------------------------------------------------------------------------
-  | 3. Query MongoDB
+  | Query MongoDB
   |--------------------------------------------------------------------------
   */
 
@@ -97,7 +107,7 @@ export const getAllProducts = async (query) => {
 
   /*
   |--------------------------------------------------------------------------
-  | 4. Store Result in Redis
+  | Cache MongoDB Result
   |--------------------------------------------------------------------------
   */
 
@@ -145,6 +155,8 @@ export const updateProduct = async (id, updatedData) => {
     throw new ApiError(404, "Product not found");
   }
 
+  await invalidateProductCache();
+
   return product;
 };
 
@@ -157,6 +169,8 @@ export const deleteProduct = async (id) => {
   if (!product) {
     throw new ApiError(404, "Product not found");
   }
+
+  await invalidateProductCache();
 
   return {
     message: "Product deleted successfully",
