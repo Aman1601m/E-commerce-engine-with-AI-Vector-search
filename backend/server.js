@@ -10,6 +10,8 @@ import errorHandler from "./middleware/errorHandler.js";
 
 import authRoutes from "./routes/authRoutes.js";
 
+import cartRoutes from "./routes/cartRoutes.js";
+
 dotenv.config();
 
 connectDB();
@@ -26,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use(notfound);
 app.use(errorHandler);
 
+app.use("/api/cart", cartRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
