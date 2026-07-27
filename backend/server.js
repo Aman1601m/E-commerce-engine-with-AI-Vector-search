@@ -3,34 +3,25 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import connectDB from "./config/db.js";
-import productRoutes from "./routes/productRoutes.js";
+import { connectRedis } from "./config/redis.js";
 
-import notfound from "./middleware/notfound.js";
+import productRoutes from "./routes/productRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+
+import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
-import authRoutes from "./routes/authRoutes.js";
-
-import cartRoutes from "./routes/cartRoutes.js";
-
 dotenv.config();
-
-connectDB();
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/api/products", productRoutes);
-app.use("/api/auth", authRoutes);
 
-
-app.use(notfound);
-app.use(errorHandler);
-
-app.use("/api/cart", cartRoutes);
-
-// Health Check Route
+// Health Check
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -38,8 +29,34 @@ app.get("/", (req, res) => {
   });
 });
 
+// API Routes
+app.use("/api/products", productRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+
+// 404 Middleware
+// Must come AFTER all valid routes.
+app.use(notFound);
+
+// Global Error Handler
+// Must be the final middleware.
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    await connectRedis();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
