@@ -5,12 +5,18 @@ import { getProducts } from "../services/productService";
 function ProductGrid() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadProducts() {
-      const data = await getProducts();
-      setProducts(data);
-      setLoading(false);
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch {
+        setError("Unable to load products.");
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadProducts();
@@ -20,6 +26,14 @@ function ProductGrid() {
     return (
       <div className="text-center text-lg">
         Loading products...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-600 font-semibold text-center">
+        {error}
       </div>
     );
   }
