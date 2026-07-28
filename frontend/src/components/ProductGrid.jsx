@@ -4,15 +4,25 @@ import { getProducts } from "../services/productService";
 
 function ProductGrid() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadProducts() {
       const data = await getProducts();
       setProducts(data);
+      setLoading(false);
     }
 
     loadProducts();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center text-lg">
+        Loading products...
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
