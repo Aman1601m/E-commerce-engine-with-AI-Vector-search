@@ -2,23 +2,38 @@ const express = require("express");
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
+const adminOnly = require("../middleware/adminMiddleware");
 
 const {
   createOrder,
   getMyOrders,
   getOrderById,
+  getAllOrders,
+  updateOrderStatus,
 } = require("../controllers/orderController");
 
-// All order routes require login
-router.use(protect);
+// ==========================
+// User Routes
+// ==========================
 
-// Create Order
-router.post("/", createOrder);
+router.post("/", protect, createOrder);
 
-// Get Logged-in User Orders
-router.get("/", getMyOrders);
+router.get("/", protect, getMyOrders);
 
-// Get Single Order
-router.get("/:id", getOrderById);
+router.get("/:id", protect, getOrderById);
+
+
+// ==========================
+// Admin Routes
+// ==========================
+
+router.get("/admin/all", protect, adminOnly, getAllOrders);
+
+router.put(
+  "/admin/:id/status",
+  protect,
+  adminOnly,
+  updateOrderStatus
+);
 
 module.exports = router;
