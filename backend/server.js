@@ -11,6 +11,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const errorHandler = require("./middleware/errorMiddleware");
 const userRoutes = require("./routes/userRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 // Connect Database
 connectDB();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+
 
 // Rate Limiter
 const limiter = rateLimit({
@@ -46,6 +48,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use(errorHandler);
+app.use("/api/cart", cartRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
