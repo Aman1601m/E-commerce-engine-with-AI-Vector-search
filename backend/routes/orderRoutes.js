@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/adminMiddleware");
+const adminOnly = require("../middleware/roleMiddleware")("admin");
 
 const {
   createOrder,
@@ -10,6 +10,7 @@ const {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  cancelOrder,
 } = require("../controllers/orderController");
 
 // ==========================
@@ -35,5 +36,7 @@ router.put(
   adminOnly,
   updateOrderStatus
 );
+
+router.put("/cancel/:id", protect, cancelOrder);
 
 module.exports = router;

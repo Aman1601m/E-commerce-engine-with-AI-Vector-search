@@ -1,18 +1,28 @@
 const Product = require("../models/Product");
+const { generateEmbedding } = require("../services/vectorSearchService");
 
 // ==============================
 // Create Product
 // ==============================
 const createProduct = async (req, res) => {
   try {
+    const { name, description } = req.body;
+    
+    // Generate AI Vector Embedding locally!
+    let embedding = [];
+    if (name && description) {
+      embedding = await generateEmbedding(`${name} ${description}`);
+    }
+
     const product = await Product.create({
       ...req.body,
+      embedding,
       createdBy: req.user.id,
     });
 
     res.status(201).json({
       success: true,
-      message: "Product created successfully",
+      message: "Product created successfully with AI Vector Embedding!",
       product,
     });
   } catch (error) {

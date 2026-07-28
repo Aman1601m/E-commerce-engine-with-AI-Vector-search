@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const protect = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/adminMiddleware");
+const authorizeRoles = require("../middleware/roleMiddleware");
 
 const {
   getAllUsers,
@@ -12,14 +12,14 @@ const {
   toggleUserStatus,
 } = require("../controllers/userController");
 
-router.get("/", protect, adminOnly, getAllUsers);
+// Only admins can access these routes
+router.use(protect);
+router.use(authorizeRoles("admin"));
 
-router.get("/:id", protect, adminOnly, getUserById);
-
-router.put("/:id", protect, adminOnly, updateUser);
-
-router.delete("/:id", protect, adminOnly, deleteUser);
-
-router.put("/:id/status", protect, adminOnly, toggleUserStatus);
+router.get("/", getAllUsers);
+router.get("/:id", getUserById);
+router.put("/:id", updateUser);
+router.delete("/:id", deleteUser);
+router.put("/:id/status", toggleUserStatus);
 
 module.exports = router;

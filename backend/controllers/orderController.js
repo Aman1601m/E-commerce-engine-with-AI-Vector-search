@@ -213,10 +213,74 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+// ==========================
+// Cancel Order - User
+// ==========================
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.orderStatus === "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Order is already cancelled",
+      });
+    }
+
+    if (
+      order.orderStatus === "shipped" ||
+      order.orderStatus === "delivered"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "This order cannot be cancelled",
+      });
+    }
+
+    // Restore stock
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: {
+          stock: item.quantity,
+        },
+      });
+    }
+
+    order.orderStatus = "cancelled";
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ==========================
+// Export Controllers
+// ==========================
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  cancelOrder,
 };

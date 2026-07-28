@@ -13,11 +13,14 @@ const errorHandler = require("./middleware/errorMiddleware");
 const userRoutes = require("./routes/userRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const { connectRedis } = require("./config/redis");
 
 // Connect Database
 connectDB();
+connectRedis();
 
 const app = express();
+
 
 // Middlewares
 app.use(express.json());

@@ -75,6 +75,11 @@ const productSchema = new mongoose.Schema(
       default: false,
     },
 
+    embedding: {
+      type: [Number], // Array of floats for vector search
+      select: false, // Don't return this large array in normal API queries by default
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
