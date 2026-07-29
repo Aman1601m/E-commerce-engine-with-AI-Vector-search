@@ -145,10 +145,42 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
+// ==============================
+// Get Dashboard Statistics
+// ==============================
+const getDashboardStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({ isDeleted: false });
+    const activeUsers = await User.countDocuments({ isDeleted: false, isActive: true });
+    const blockedUsers = await User.countDocuments({ isDeleted: false, isActive: false });
+    const verifiedUsers = await User.countDocuments({ isDeleted: false, isVerified: true });
+    const adminCount = await User.countDocuments({ isDeleted: false, role: 'admin' });
+    const customerCount = await User.countDocuments({ isDeleted: false, role: 'customer' });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalUsers,
+        activeUsers,
+        blockedUsers,
+        verifiedUsers,
+        adminCount,
+        customerCount,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
   toggleUserStatus,
+  getDashboardStats,
 };

@@ -10,12 +10,14 @@ const {
   updateUser,
   deleteUser,
   toggleUserStatus,
+  getDashboardStats,
 } = require("../controllers/userController");
 
 // Only admins can access these routes
 router.use(protect);
 router.use(authorizeRoles("admin"));
 
+router.get("/stats", getDashboardStats);
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
 router.put("/:id", updateUser);
