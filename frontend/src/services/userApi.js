@@ -19,4 +19,16 @@ export const userApi = {
     const response = await API.get('/users/stats');
     return response.data;
   },
+  getAllUsers: async () => {
+    const response = await API.get('/users');
+    return response.data;
+  },
+  toggleUserStatus: async (id) => {
+    const response = await API.put(`/users/${id}/status`);
+    return response.data;
+  },
+  deleteUser: async (id) => {
+    const response = await API.delete(`/users/${id}`);
+    return response.data;
+  }
 };
