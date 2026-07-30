@@ -1,14 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserTable from '../components/UserTable';
 import { Plus } from 'lucide-react';
+import { userApi } from '../services/userApi';
+import Loader from '../components/Loader';
 
 const Users = () => {
-  // Mock data for UI scaffolding
-  const [users] = useState([
-    { id: 1, name: 'Aman Sharma', email: 'aman@example.com', role: 'admin', isActive: true },
-    { id: 2, name: 'Shikhar', email: 'shikhar@example.com', role: 'admin', isActive: true },
-    { id: 3, name: 'John Doe', email: 'john@example.com', role: 'customer', isActive: false },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchUsers = async () => {
+    try {
+      const response = await userApi.getAllUsers();
+      if (response.success) {
+        setUsers(response.users);
+      }
+    } catch (err) {
+      setError('Failed to load users');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleToggleStatus = async (id) => {
+    try {
+      await userApi.toggleUserStatus(id);
+      fetchUsers(); // Refresh list
+    } catch (err) {
+      console.error('Failed to toggle status', err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await userApi.deleteUser(id);
+        fetchUsers(); // Refresh list
+      } catch (err) {
+        console.error('Failed to delete user', err);
+      }
+    }
+  };
+
+  if (loading) return <Loader />;
 
   return (
     <div>
@@ -22,8 +61,10 @@ const Users = () => {
         </button>
       </div>
 
+      {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</div>}
+
       <div className="glass" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-        <UserTable users={users} />
+        <UserTable users={users} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />
       </div>
     </div>
   );
