@@ -1,98 +1,111 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, clearError } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { setCredentials } from '../store/authSlice';
-import { authApi } from '../services/authApi';
-import { Lock, Mail } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    
-    try {
-      const response = await authApi.login({ email, password });
-      
-      if (response.success) {
-        dispatch(setCredentials({ user: response.user, token: response.token }));
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login. Please try again.');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    dispatch(clearError());
+    if (isAuthenticated) {
+      navigate('/dashboard');
     }
+  }, [isAuthenticated, navigate, dispatch]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(loginUser({ email, password }));
   };
 
   return (
-    <div>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>Welcome Back</h2>
-        <p style={{ color: 'var(--text-secondary)' }}>Sign in to access the admin dashboard.</p>
-      </div>
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: '1rem',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Decorative Orbs */}
+      <div style={{ position: 'absolute', top: '10%', left: '20%', width: '300px', height: '300px', background: 'var(--primary-color)', filter: 'blur(100px)', borderRadius: '50%', opacity: 0.15, animation: 'float 10s infinite ease-in-out' }}></div>
+      <div style={{ position: 'absolute', bottom: '10%', right: '20%', width: '400px', height: '400px', background: 'var(--secondary-color)', filter: 'blur(120px)', borderRadius: '50%', opacity: 0.15, animation: 'float 12s infinite ease-in-out reverse' }}></div>
 
-      {error && (
-        <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger-color)', color: 'var(--danger-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-          {error}
+      <div className="glass-panel animate-fade-in-up" style={{ 
+        width: '100%', 
+        maxWidth: '420px', 
+        padding: '3rem 2.5rem', 
+        borderRadius: '24px',
+        position: 'relative',
+        zIndex: 10
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.5rem', margin: '0 auto 1.5rem auto', boxShadow: 'var(--shadow-glow)' }}>
+            E
+          </div>
+          <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.5rem', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Welcome Back
+          </h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Sign in to access the EngineAI admin panel.</p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label className="input-label" htmlFor="email">Email Address</label>
-          <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: '1rem', color: 'var(--text-secondary)' }}>
-              <Mail size={18} />
-            </div>
+        {error && (
+          <div className="animate-fade-in-up" style={{ padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
             <input
-              id="email"
               type="email"
-              className="input-field"
-              style={{ width: '100%', paddingLeft: '2.5rem' }}
-              placeholder="admin@example.com"
+              id="email"
+              className="form-control"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="admin@example.com"
             />
           </div>
-        </div>
-
-        <div className="input-group" style={{ marginBottom: '2rem' }}>
-          <label className="input-label" htmlFor="password">Password</label>
-          <div style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: '1rem', color: 'var(--text-secondary)' }}>
-              <Lock size={18} />
-            </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
             <input
-              id="password"
               type="password"
-              className="input-field"
-              style={{ width: '100%', paddingLeft: '2.5rem' }}
-              placeholder="••••••••"
+              id="password"
+              className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="••••••••"
             />
           </div>
-        </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--primary-color)', cursor: 'pointer' }}>Forgot password?</span>
+          </div>
 
-        <button 
-          type="submit" 
-          className="btn btn-primary" 
-          style={{ width: '100%', padding: '0.75rem' }}
-          disabled={loading}
-        >
-          {loading ? 'Signing In...' : 'Sign In'}
-        </button>
-      </form>
+          <button 
+            type="submit" 
+            className="btn btn-primary" 
+            style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in...' : (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Sign In <LogIn size={20} />
+              </span>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
