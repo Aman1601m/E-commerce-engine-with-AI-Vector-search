@@ -6,21 +6,29 @@ const ai = new GoogleGenAI({
 
 export const buildProductEmbeddingText = (product) => {
   return `
-    Product Name: ${product.name}
-    Description: ${product.description}
-    Brand: ${product.brand}
-    Category: ${product.category}
-    Tags: ${(product.tags || []).join(", ")}
-  `.trim();
+Product Name: ${product.name}
+Description: ${product.description}
+Brand: ${product.brand}
+Category: ${product.category}
+Tags: ${(product.tags || []).join(", ")}
+`.trim();
 };
 
-export const generateProductEmbedding = async (product) => {
-  const text = buildProductEmbeddingText(product);
-
+export const generateEmbedding = async (text) => {
   const response = await ai.models.embedContent({
     model: "gemini-embedding-2",
     contents: text,
   });
 
   return response.embeddings[0].values;
+};
+
+export const generateProductEmbedding = async (product) => {
+  const text = buildProductEmbeddingText(product);
+
+  return generateEmbedding(text);
+};
+
+export const generateQueryEmbedding = async (query) => {
+  return generateEmbedding(query);
 };
