@@ -3,6 +3,7 @@ import UserTable from '../components/UserTable';
 import { Plus } from 'lucide-react';
 import { userApi } from '../services/userApi';
 import Loader from '../components/Loader';
+import { toast } from 'react-hot-toast';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -30,9 +31,11 @@ const Users = () => {
   const handleToggleStatus = async (id) => {
     try {
       await userApi.toggleUserStatus(id);
+      toast.success('User status updated successfully');
       fetchUsers(); // Refresh list
     } catch (err) {
       console.error('Failed to toggle status', err);
+      toast.error('Failed to update user status');
     }
   };
 
@@ -40,9 +43,11 @@ const Users = () => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await userApi.deleteUser(id);
+        toast.success('User deleted successfully');
         fetchUsers(); // Refresh list
       } catch (err) {
         console.error('Failed to delete user', err);
+        toast.error('Failed to delete user');
       }
     }
   };

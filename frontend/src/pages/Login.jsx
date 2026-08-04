@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const Login = () => {
   useEffect(() => {
     dispatch(clearError());
     if (isAuthenticated) {
+      toast.success('Successfully logged in!');
       navigate('/dashboard');
     }
   }, [isAuthenticated, navigate, dispatch]);
