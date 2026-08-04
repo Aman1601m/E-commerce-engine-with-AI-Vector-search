@@ -41,19 +41,29 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Routes
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "E-Commerce Engine API Running...",
-  });
-});
-
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use(errorHandler);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use(errorHandler);
+
+// Production React static file serving
+const path = require("path");
+if (process.env.NODE_ENV === "production") {
+  const frontendPath = path.join(__dirname, "../frontend/dist");
+  app.use(express.static(frontendPath));
+  
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(frontendPath, "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: "E-Commerce Engine API Running...",
+    });
+  });
+}
 
 // Start Server
 const PORT = process.env.PORT || 5000;
