@@ -1,244 +1,95 @@
-const Cart = require("../models/Cart");
-const Product = require("../models/Product");
+import {
+  getCart,
+  addToCart,
+  updateCartItem,
+  removeFromCart,
+  clearCart,
+} from "../services/cartService.js";
 
-// =====================
-// Add To Cart
-// =====================
-const addToCart = async (req, res) => {
+export const getCartController = async (req, res, next) => {
   try {
-    const { productId, quantity } = req.body;
+    const cart = await getCart(req.user._id);
 
-    const product = await Product.findById(productId);
+    res.status(200).json({
+      success: true,
+      data: cart,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    let cart = await Cart.findOne({ user: req.user.id });
-
-    if (!cart) {
-      cart = await Cart.create({
-        user: req.user.id,
-        products: [],
-      });
-    }
-
-    const existingProduct = cart.products.find(
-      (item) => item.product.toString() === productId
+export const addToCartController = async (req, res, next) => {
+  try {
+    const cart = await addToCart(
+      req.user._id,
+      req.params.productId,
+      req.body.quantity
     );
-
-    if (existingProduct) {
-      existingProduct.quantity += quantity;
-    } else {
-      cart.products.push({
-        product: productId,
-        quantity,
-        price: product.price,
-      });
-    }
-
-    cart.totalPrice = cart.products.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    await cart.save();
 
     res.status(200).json({
       success: true,
       message: "Product added to cart",
-      cart,
+      data: cart,
     });
-
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-// =====================
-// Get Cart
-// =====================
-const getCart = async (req, res) => {
+export const updateCartItemController = async (
+  req,
+  res,
+  next
+) => {
   try {
-
-    const cart = await Cart.findOne({
-      user: req.user.id,
-    }).populate("products.product");
+    const cart = await updateCartItem(
+      req.user._id,
+      req.params.productId,
+      req.body.quantity
+    );
 
     res.status(200).json({
       success: true,
-      cart,
+      message: "Cart updated successfully",
+      data: cart,
     });
-
   } catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-
+    next(error);
   }
 };
 
-// =====================
-// Update Cart Item
-// =====================
-const updateCartItem = async (req, res) => {
+export const removeFromCartController = async (
+  req,
+  res,
+  next
+) => {
   try {
-    const { productId } = req.params;
-    const { quantity } = req.body;
-
-    if (!quantity || quantity < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be at least 1",
-      });
-    }
-
-    const cart = await Cart.findOne({
-      user: req.user.id,
-    });
-
-    if (!cart) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart not found",
-      });
-    }
-
-    const item = cart.products.find(
-      (item) => item.product.toString() === productId
+    const cart = await removeFromCart(
+      req.user._id,
+      req.params.productId
     );
-
-    if (!item) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found in cart",
-      });
-    }
-
-    item.quantity = quantity;
-
-    cart.totalPrice = cart.products.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    await cart.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Cart item updated successfully",
-      cart,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// =====================
-// Remove Cart Item
-// =====================
-const removeCartItem = async (req, res) => {
-  try {
-    const { productId } = req.params;
-
-    const cart = await Cart.findOne({
-      user: req.user.id,
-    });
-
-    if (!cart) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart not found",
-      });
-    }
-
-    const itemExists = cart.products.some(
-      (item) => item.product.toString() === productId
-    );
-
-    if (!itemExists) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found in cart",
-      });
-    }
-
-    cart.products = cart.products.filter(
-      (item) => item.product.toString() !== productId
-    );
-
-    cart.totalPrice = cart.products.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    await cart.save();
 
     res.status(200).json({
       success: true,
       message: "Product removed from cart",
-      cart,
+      data: cart,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-// =====================
-// Clear Cart
-// =====================
-const clearCart = async (req, res) => {
+export const clearCartController = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({
-      user: req.user.id,
-    });
-
-    if (!cart) {
-      return res.status(404).json({
-        success: false,
-        message: "Cart not found",
-      });
-    }
-
-    cart.products = [];
-    cart.totalPrice = 0;
-
-    await cart.save();
+    const cart = await clearCart(req.user._id);
 
     res.status(200).json({
       success: true,
       message: "Cart cleared successfully",
-      cart,
+      data: cart,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
-};
-
-// =====================
-// Export Controllers
-// =====================
-module.exports = {
-  addToCart,
-  getCart,
-  updateCartItem,
-  removeCartItem,
-  clearCart,
 };

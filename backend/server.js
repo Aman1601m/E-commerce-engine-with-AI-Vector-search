@@ -1,54 +1,49 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const helmet = require("helmet");
-const morgan = require("morgan");
-const rateLimit = require("express-rate-limit");
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+
+import connectDB from "./config/db.js";
+import { connectRedis } from "./config/redis.js";
+
+import productRoutes from "./routes/productRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+
+import notFound from "./middleware/notFound.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
 
-const connectDB = require("./config/db");
-const authRoutes = require("./routes/authRoutes");
-const errorHandler = require("./middleware/errorMiddleware");
-const userRoutes = require("./routes/userRoutes");
-const cartRoutes = require("./routes/cartRoutes");
-const orderRoutes = require("./routes/orderRoutes");
-const { connectRedis } = require("./config/redis");
-
-// Connect Database
-connectDB();
-connectRedis();
-
 const app = express();
 
-
-// Middlewares
-app.use(express.json());
+// Middleware
 app.use(cors());
-app.use(helmet());
-app.use(morgan("dev"));
+app.use(express.json());
 
-
-// Rate Limiter
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
-  message: {
-    success: false,
-    message: "Too many requests. Please try again later.",
-  },
+// Health Check
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "High Performance E-commerce Engine is running",
+  });
 });
 
-app.use(limiter);
+import userRoutes from "./routes/userRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// API Routes
+app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
-app.use(errorHandler);
+app.use("/api/users", userRoutes);
 
 // Production React static file serving
-const path = require("path");
 if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
@@ -56,18 +51,30 @@ if (process.env.NODE_ENV === "production") {
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(frontendPath, "index.html"));
   });
-} else {
-  app.get("/", (req, res) => {
-    res.status(200).json({
-      success: true,
-      message: "E-Commerce Engine API Running...",
-    });
-  });
 }
 
-// Start Server
+// 404 Middleware
+// Must come AFTER all valid routes.
+app.use(notFound);
+
+// Global Error Handler
+// Must be the final middleware.
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    await connectRedis();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

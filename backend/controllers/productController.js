@@ -1,85 +1,79 @@
-const Product = require("../models/Product");
-const { generateEmbedding } = require("../services/vectorSearchService");
+import {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} from "../services/productService.js";
 
-// ==============================
 // Create Product
-// ==============================
-const createProduct = async (req, res) => {
+export const createProductController = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
-    
-    // Generate AI Vector Embedding locally!
-    let embedding = [];
-    if (name && description) {
-      embedding = await generateEmbedding(`${name} ${description}`);
-    }
-
-    const product = await Product.create({
-      ...req.body,
-      embedding,
-      createdBy: req.user.id,
-    });
+    const product = await createProduct(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Product created successfully with AI Vector Embedding!",
-      product,
+      message: "Product created successfully",
+      data: product,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-// ==============================
 // Get All Products
-// ==============================
-const getAllProducts = async (req, res) => {
+export const getAllProductsController = async (req, res, next) => {
   try {
-    const products = await Product.find({
-      isDeleted: false,
-    }).populate("createdBy", "name email");
+    const result = await getAllProducts(req.query);
 
     res.status(200).json({
       success: true,
-      count: products.length,
-      products,
+      ...result,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-// ==============================
-// Get Single Product
-// ==============================
-const getSingleProduct = async (req, res) => {
+// Get Product By ID
+export const getProductByIdController = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate(
-      "createdBy",
-      "name email"
-    );
-
-    if (!product || product.isDeleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
+    const product = await getProductById(req.params.id);
 
     res.status(200).json({
       success: true,
-      product,
+      data: product,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
+    next(error);
+  }
+};
+
+// Update Product
+export const updateProductController = async (req, res, next) => {
+  try {
+    const product = await updateProduct(req.params.id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: product,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete Product
+export const deleteProductController = async (req, res, next) => {
+  try {
+    const result = await deleteProduct(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    next(error);
   }
 };

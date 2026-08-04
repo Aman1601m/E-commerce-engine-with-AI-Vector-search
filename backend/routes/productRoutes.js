@@ -1,33 +1,61 @@
-const express = require("express");
+import express from "express";
+
+import {
+  createProductController,
+  getAllProductsController,
+  getProductByIdController,
+  updateProductController,
+  deleteProductController,
+} from "../controllers/productController.js";
+
+import validate from "../middleware/validate.js";
+import protect from "../middleware/protect.js";
+import authorize from "../middleware/authorize.js";
+
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/productValidation.js";
+
 const router = express.Router();
 
-const protect = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/roleMiddleware")("admin");
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-const {
-  createProduct,
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  getProductsByCategory,
-  searchProducts,
-} = require("../controllers/productController");
+router.get("/", getAllProductsController);
 
-// Public Routes
-router.get("/", getAllProducts);
+router.get("/:id", getProductByIdController);
 
-router.get("/category/:category", getProductsByCategory);
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
 
-router.get("/search/:keyword", searchProducts);
+router.post(
+  "/",
+  protect,
+  authorize("admin"),
+  validate(createProductSchema),
+  createProductController
+);
 
-router.get("/:id", getSingleProduct);
+router.put(
+  "/:id",
+  protect,
+  authorize("admin"),
+  validate(updateProductSchema),
+  updateProductController
+);
 
-// Admin Routes
-router.post("/", protect, adminOnly, createProduct);
+router.delete(
+  "/:id",
+  protect,
+  authorize("admin"),
+  deleteProductController
+);
 
-router.put("/:id", protect, adminOnly, updateProduct);
-
-router.delete("/:id", protect, adminOnly, deleteProduct);
-
-module.exports = router;
+export default router;

@@ -1,22 +1,28 @@
-const express = require("express");
-const router = express.Router();
+import express from "express";
+import protect from "../middleware/protect.js";
+import authorize from "../middleware/authorize.js";
 
-const protect = require("../middleware/authMiddleware");
-const authorizeRoles = require("../middleware/roleMiddleware");
-
-const {
+import {
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
   toggleUserStatus,
   getDashboardStats,
-} = require("../controllers/userController");
+  updateProfile,
+  changePassword
+} from "../controllers/userController.js";
 
-// Only admins can access these routes
+const router = express.Router();
+
 router.use(protect);
-router.use(authorizeRoles("admin"));
 
+// Self-service profile routes (Any logged-in user)
+router.put("/profile", updateProfile);
+router.put("/change-password", changePassword);
+
+// Admin-only routes
+router.use(authorize("admin"));
 router.get("/stats", getDashboardStats);
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
@@ -24,4 +30,4 @@ router.put("/:id", updateUser);
 router.delete("/:id", deleteUser);
 router.put("/:id/status", toggleUserStatus);
 
-module.exports = router;
+export default router;

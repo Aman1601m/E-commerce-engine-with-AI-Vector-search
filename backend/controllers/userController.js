@@ -1,9 +1,10 @@
-const User = require("../models/User");
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 // ==============================
 // Get All Users
 // ==============================
-const getAllUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({
       isDeleted: false,
@@ -25,7 +26,7 @@ const getAllUsers = async (req, res) => {
 // ==============================
 // Get Single User
 // ==============================
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
 
@@ -51,7 +52,7 @@ const getUserById = async (req, res) => {
 // ==============================
 // Update User
 // ==============================
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -85,7 +86,7 @@ const updateUser = async (req, res) => {
 // ==============================
 // Soft Delete User
 // ==============================
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -97,7 +98,6 @@ const deleteUser = async (req, res) => {
     }
 
     user.isDeleted = true;
-
     await user.save();
 
     res.status(200).json({
@@ -115,7 +115,7 @@ const deleteUser = async (req, res) => {
 // ==============================
 // Block / Unblock User
 // ==============================
-const toggleUserStatus = async (req, res) => {
+export const toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -127,14 +127,11 @@ const toggleUserStatus = async (req, res) => {
     }
 
     user.isActive = !user.isActive;
-
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: `User ${
-        user.isActive ? "activated" : "blocked"
-      } successfully`,
+      message: `User ${user.isActive ? "activated" : "blocked"} successfully`,
       user,
     });
   } catch (error) {
@@ -148,7 +145,7 @@ const toggleUserStatus = async (req, res) => {
 // ==============================
 // Get Dashboard Statistics
 // ==============================
-const getDashboardStats = async (req, res) => {
+export const getDashboardStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments({ isDeleted: false });
     const activeUsers = await User.countDocuments({ isDeleted: false, isActive: true });
@@ -176,11 +173,42 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-  toggleUserStatus,
-  getDashboardStats,
+// ==============================
+// Update Profile (Aman's code moved here)
+// ==============================
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    const updatedUser = await user.save();
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==============================
+// Change Password (Aman's code moved here)
+// ==============================
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id).select("+password");
+
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.status(400).json({ success: false, message: "Incorrect old password" });
+
+    user.password = newPassword; // Pre-save hook will hash it
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

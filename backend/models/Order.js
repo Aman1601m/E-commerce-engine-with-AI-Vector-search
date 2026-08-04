@@ -1,4 +1,40 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
+const orderItemSchema = new mongoose.Schema(
+  {
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+
+    name: {
+      type: String,
+      required: true,
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    itemTotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  {
+    _id: false,
+  }
+);
 
 const orderSchema = new mongoose.Schema(
   {
@@ -6,89 +42,31 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
 
-    items: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
-        },
-
-        name: {
-          type: String,
-          required: true,
-        },
-
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-
-        price: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
-
-    totalAmount: {
-      type: Number,
+    items: {
+      type: [orderItemSchema],
       required: true,
     },
 
-    shippingAddress: {
-      fullName: {
-        type: String,
-        required: true,
-      },
-
-      phone: {
-        type: String,
-        required: true,
-      },
-
-      address: {
-        type: String,
-        required: true,
-      },
-
-      city: {
-        type: String,
-        required: true,
-      },
-
-      state: {
-        type: String,
-        required: true,
-      },
-
-      pincode: {
-        type: String,
-        required: true,
-      },
+    totalItems: {
+      type: Number,
+      required: true,
+      min: 1,
     },
 
-    paymentMethod: {
-      type: String,
-      enum: ["COD", "ONLINE"],
-      default: "COD",
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
     },
 
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed"],
-      default: "pending",
-    },
-
-    orderStatus: {
+    status: {
       type: String,
       enum: [
         "pending",
         "confirmed",
-        "processing",
         "shipped",
         "delivered",
         "cancelled",
@@ -101,4 +79,6 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+
+export default Order;

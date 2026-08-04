@@ -1,29 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, clearError } from '../store/authSlice';
+import { setCredentials } from '../store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { authApi } from '../services/authApi';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(clearError());
     if (isAuthenticated) {
-      toast.success('Successfully logged in!');
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [isAuthenticated, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authApi.login({ email, password });
+      dispatch(setCredentials({ user: response.user, token: response.token }));
+      toast.success('Successfully logged in!');
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid credentials');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

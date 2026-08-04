@@ -1,16 +1,23 @@
-const { validationResult } = require("express-validator");
+import ApiError from "../utils/ApiError.js";
 
-const validate = (req, res, next) => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array(),
+const validate = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true
     });
-  }
 
-  next();
+    if (error) {
+      throw new ApiError(
+        400,
+        error.details.map((item) => item.message).join(", ")
+      );
+    }
+
+    req.body = value;
+
+    next();
+  };
 };
 
-module.exports = validate;
+export default validate;
