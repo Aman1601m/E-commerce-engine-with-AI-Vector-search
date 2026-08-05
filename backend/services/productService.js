@@ -12,7 +12,7 @@ import {
 
 import {
   generateProductEmbedding,
-
+  generateQueryEmbedding,
 } from "./embeddingService.js";
 
 import dotenv from "dotenv";
@@ -189,4 +189,35 @@ export const deleteProduct = async (id) => {
   return {
     message: "Product deleted successfully",
   };
+};
+
+// Sematic Product Search
+export const semanticSearchProducts = async (query) => {
+  if (!query) {
+    throw new ApiError(400, "Search query is required");
+  }
+
+  const queryVector = await generateQueryEmbedding(query);
+
+  const products = await Product.aggregate([
+    {
+      $vectorSearch: {
+        index: "vector_index",
+        path: "embedding",
+        queryVector,
+        numCandidates: 100,
+        limit: 10,
+      },
+    },
+    {
+      $project: {
+        embedding: 0,
+        score: {
+          $meta: "vectorSearchScore",
+        },
+      },
+    },
+  ]);
+
+  return products;
 };

@@ -32,3 +32,7 @@ export const generateProductEmbedding = async (product) => {
 export const generateQueryEmbedding = async (query) => {
   return generateEmbedding(query);
 };
+
+export const generateQueryEmbedding = async (query) =>{
+  return generateEmbedding(query);
+};

@@ -6,6 +6,7 @@ import {
   getProductByIdController,
   updateProductController,
   deleteProductController,
+  semanticSearchController,
 } from "../controllers/productController.js";
 
 import validate from "../middleware/validate.js";
@@ -26,6 +27,8 @@ const router = express.Router();
 */
 
 router.get("/", getAllProductsController);
+
+router.get("/search", semanticSearchController);
 
 router.get("/:id", getProductByIdController);
 
