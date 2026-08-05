@@ -21,6 +21,8 @@ dotenv.config();
 
 const PRODUCT_CACHE_TTL = 300;
 
+const SEMANTIC_CACHE_TTL = 300; 
+
 /**
  * Create Product
  */
@@ -197,6 +199,21 @@ export const semanticSearchProducts = async (query) => {
     throw new ApiError(400, "Search query is required");
   }
 
+  const cacheKey = `semantic-search:${query.toLowerCase().trim()}`;
+
+  // Check Redis
+  if (redisClient.isReady) {
+    const cachedData = await redisClient.get(cacheKey);
+
+    if (cachedData) {
+      console.log(`SEMANTIC CACHE HIT: ${cacheKey}`);
+
+      return JSON.parse(cachedData);
+    }
+
+    console.log(`SEMANTIC CACHE MISS: ${cacheKey}`);
+  }
+
   const queryVector = await generateQueryEmbedding(query);
 
   const products = await Product.aggregate([
@@ -218,6 +235,14 @@ export const semanticSearchProducts = async (query) => {
       },
     },
   ]);
+
+  if (redisClient.isReady) {
+    await redisClient.setEx(
+      cacheKey,
+      SEMANTIC_CACHE_TTL,
+      JSON.stringify(products)
+    );
+  }
 
   return products;
 };
