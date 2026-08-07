@@ -4,6 +4,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  semanticSearchProducts,
 } from "../services/productService.js";
 
 // Create Product
