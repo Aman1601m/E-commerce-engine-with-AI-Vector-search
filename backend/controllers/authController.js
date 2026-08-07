@@ -44,3 +44,37 @@ export const getProfileController = async (req, res, next) => {
         next(error);
     }
 };
+
+import { forgotPassword, resetPassword } from "../services/authService.js";
+
+export const forgotPasswordController = async (req, res, next) => {
+    try {
+        const resetToken = await forgotPassword(req.body.email);
+
+        // Simulated email send
+        const resetUrl = `http://localhost:5174/resetpassword/${resetToken}`;
+        console.log(`\n\n[MOCK EMAIL] Password Reset Link: ${resetUrl}\n\n`);
+
+        res.status(200).json({
+            success: true,
+            message: "Reset token generated. Check console for link.",
+            data: resetToken
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPasswordController = async (req, res, next) => {
+    try {
+        const token = await resetPassword(req.params.token, req.body.password);
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successful",
+            token,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

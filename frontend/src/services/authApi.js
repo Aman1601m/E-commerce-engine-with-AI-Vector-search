@@ -48,4 +48,12 @@ export const authApi = {
     const response = await API.put('/users/change-password', passwords);
     return response.data;
   },
+  forgotPassword: async (email) => {
+    const response = await API.post('/auth/forgotpassword', { email });
+    return response.data;
+  },
+  resetPassword: async (token, password) => {
+    const response = await API.post(`/auth/resetpassword/${token}`, { password });
+    return response.data;
+  },
 };

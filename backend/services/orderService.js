@@ -8,22 +8,18 @@ import ApiError from "../utils/ApiError.js";
 /**
  * Create an order from the authenticated user's cart.
  */
-export const createOrder = async (userId) => {
+export const createOrder = async (userId, clientItems) => {
   const session = await mongoose.startSession();
 
   try {
     let createdOrder;
 
     await session.withTransaction(async () => {
-      const cart = await Cart.findOne({
-        user: userId,
-      }).session(session);
-
-      if (!cart || cart.items.length === 0) {
+      if (!clientItems || clientItems.length === 0) {
         throw new ApiError(400, "Cart is empty");
       }
 
-      const productIds = cart.items.map((item) => item.product);
+      const productIds = clientItems.map((item) => item.product);
 
       const products = await Product.find({
         _id: { $in: productIds },
@@ -40,7 +36,7 @@ export const createOrder = async (userId) => {
       let subtotal = 0;
       let totalItems = 0;
 
-      for (const cartItem of cart.items) {
+      for (const cartItem of clientItems) {
         const product = productMap.get(
           cartItem.product.toString()
         );
@@ -82,7 +78,7 @@ export const createOrder = async (userId) => {
        * Conditional stock updates prevent stock from going below zero
        * if another order modifies inventory at the same time.
        */
-      for (const cartItem of cart.items) {
+      for (const cartItem of clientItems) {
         const updatedProduct = await Product.findOneAndUpdate(
           {
             _id: cartItem.product,
@@ -122,9 +118,12 @@ export const createOrder = async (userId) => {
 
       createdOrder = orders[0];
 
-      cart.items = [];
-
-      await cart.save({ session });
+      // If user had a db cart, optionally clear it, but we don't strictly need to throw error if not exists
+      const cart = await Cart.findOne({ user: userId }).session(session);
+      if (cart) {
+        cart.items = [];
+        await cart.save({ session });
+      }
     });
 
     return createdOrder;

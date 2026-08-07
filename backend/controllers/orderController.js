@@ -10,7 +10,7 @@ export const createOrderController = async (
   next
 ) => {
   try {
-    const order = await createOrder(req.user._id);
+    const order = await createOrder(req.user._id, req.body.orderItems);
 
     res.status(201).json({
       success: true,

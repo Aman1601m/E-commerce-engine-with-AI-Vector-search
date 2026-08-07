@@ -28,6 +28,14 @@
   /* Advanced Shadows */
   --shadow-glow: 0 0 20px var(--primary-glow);
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  
+  /* Storefront Theme (General E-Commerce Platform) */
+  --store-bg: #f4f6f8;
+  --store-text: #1a1a2e;
+  --store-text-light: #7b7b93;
+  --store-primary: #4338ca; /* Indigo/Purple */
+  --store-secondary: #ff5722; /* Vibrant Orange */
+  --store-accent: #e0e7ff;
 }
 
 * {
@@ -46,6 +54,39 @@ body {
     radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
     radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
   background-attachment: fixed;
+}
+
+/* Storefront specific classes */
+.storefront-body {
+  background-color: var(--store-bg);
+  color: var(--store-text);
+}
+
+.store-btn {
+  background-color: var(--store-text);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+.store-btn:hover {
+  background-color: var(--store-primary);
+  transform: translateY(-2px);
+}
+
+.store-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  transition: all 0.3s ease;
+}
+.store-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
 }
 
 /* Base Elements */

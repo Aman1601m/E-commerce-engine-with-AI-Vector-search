@@ -3,12 +3,14 @@ import express from "express";
 import {
   registerController,
   loginController,
-  profileController,
+  getProfileController,
+  forgotPasswordController,
+  resetPasswordController,
 } from "../controllers/authController.js";
 
 import validate from "../middleware/validate.js";
 
-import protect from "../middleware/authMiddleware.js";
+import protect from "../middleware/protect.js";
 
 import {
   registerSchema,
@@ -32,7 +34,10 @@ router.post(
 router.get(
   "/profile",
   protect,
-  profileController
+  getProfileController
 );
+
+router.post("/forgotpassword", forgotPasswordController);
+router.post("/resetpassword/:token", resetPasswordController);
 
 export default router;
