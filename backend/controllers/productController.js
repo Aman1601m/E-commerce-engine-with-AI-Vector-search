@@ -78,3 +78,16 @@ export const deleteProductController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const semanticSearchController = async (req, res, next) => {
+  try {
+    const products = await semanticSearchProducts(req.query.q);
+
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

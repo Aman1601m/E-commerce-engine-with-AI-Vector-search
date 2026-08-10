@@ -11,8 +11,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    // Optionally redirect to an unauthorized page, here we just redirect to dashboard
-    return <Navigate to="/dashboard" replace />;
+    // Redirect unauthorized users to storefront home
+    return <Navigate to="/" replace />;
   }
 
   return children;

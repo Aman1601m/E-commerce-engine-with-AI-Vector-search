@@ -10,10 +10,15 @@ const safeParseJSON = (data) => {
 
 const initialCartItems = safeParseJSON(localStorage.getItem('cartItems'));
 
+const initialShippingAddress = safeParseJSON(localStorage.getItem('shippingAddress')) || {};
+const initialPaymentMethod = localStorage.getItem('paymentMethod') || 'CashOnDelivery';
+
 const initialState = {
   items: initialCartItems,
   totalQuantity: initialCartItems.reduce((total, item) => total + item.quantity, 0),
   totalPrice: initialCartItems.reduce((total, item) => total + item.price * item.quantity, 0),
+  shippingAddress: initialShippingAddress,
+  paymentMethod: initialPaymentMethod,
 };
 
 const cartSlice = createSlice({
@@ -59,9 +64,17 @@ const cartSlice = createSlice({
       state.totalQuantity = 0;
       state.totalPrice = 0;
       localStorage.removeItem('cartItems');
+    },
+    saveShippingAddress(state, action) {
+      state.shippingAddress = action.payload;
+      localStorage.setItem('shippingAddress', JSON.stringify(action.payload));
+    },
+    savePaymentMethod(state, action) {
+      state.paymentMethod = action.payload;
+      localStorage.setItem('paymentMethod', action.payload);
     }
   },
 });
 
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, clearCart, saveShippingAddress, savePaymentMethod } = cartSlice.actions;
 export default cartSlice.reducer;

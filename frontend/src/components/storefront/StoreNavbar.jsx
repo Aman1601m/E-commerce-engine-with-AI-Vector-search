@@ -1,11 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, User, Heart, Menu } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const StoreNavbar = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const { totalQuantity } = useSelector((state) => state.cart);
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleCategoryClick = (e, cat) => {
+    e.preventDefault();
+    navigate(`/search?q=${encodeURIComponent(cat)}`);
+  };
 
   return (
     <header style={{ 
@@ -38,7 +52,7 @@ const StoreNavbar = () => {
         </div>
 
         {/* Mega Search Bar */}
-        <div style={{ flex: 1, maxWidth: '600px', display: 'flex' }}>
+        <form onSubmit={handleSearch} style={{ flex: 1, maxWidth: '600px', display: 'flex' }}>
           <select style={{ padding: '0.75rem', border: '2px solid var(--store-primary)', borderRight: 'none', borderRadius: '8px 0 0 8px', outline: 'none', backgroundColor: '#f8f9fa', fontWeight: 600, color: 'var(--store-text)' }}>
             <option>All Categories</option>
             <option>Electronics</option>
@@ -46,32 +60,29 @@ const StoreNavbar = () => {
           </select>
           <input 
             type="text" 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for products, brands and more..." 
             style={{ flex: 1, padding: '0.75rem 1rem', border: '2px solid var(--store-primary)', borderLeft: '1px solid #ccc', outline: 'none', fontSize: '0.95rem' }} 
           />
-          <button style={{ backgroundColor: 'var(--store-primary)', color: 'white', border: 'none', padding: '0 1.5rem', borderRadius: '0 8px 8px 0', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <button type="submit" style={{ backgroundColor: 'var(--store-primary)', color: 'white', border: 'none', padding: '0 1.5rem', borderRadius: '0 8px 8px 0', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             <Search size={20} />
           </button>
-        </div>
+        </form>
 
         {/* Icons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)' }}>
-            <Heart size={22} />
-            <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Wishlist</span>
-          </div>
-          
-          {isAuthenticated ? (
-            <div onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/'; }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)' }}>
-              <User size={22} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Logout</span>
+          <Link to="/wishlist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)', position: 'relative', textDecoration: 'none' }}>
+            <div style={{ position: 'relative' }}>
+              <Heart size={22} />
+              {useSelector((state) => state.wishlist.items).length > 0 && (
+                <span style={{ position: 'absolute', top: '-6px', right: '-8px', background: 'var(--store-secondary)', color: 'white', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '50%', fontWeight: 'bold' }}>
+                  {useSelector((state) => state.wishlist.items).length}
+                </span>
+              )}
             </div>
-          ) : (
-            <Link to="/login" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)', textDecoration: 'none' }}>
-              <User size={22} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Account</span>
-            </Link>
-          )}
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Wishlist</span>
+          </Link>
           
           <Link to="/cart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)', position: 'relative', textDecoration: 'none' }}>
             <div style={{ position: 'relative' }}>
@@ -84,6 +95,24 @@ const StoreNavbar = () => {
             </div>
             <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Cart</span>
           </Link>
+
+          {isAuthenticated ? (
+            <>
+              <Link to="/account" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)', textDecoration: 'none' }}>
+                <User size={22} />
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Account</span>
+              </Link>
+              <div onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/'; }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)' }}>
+                <User size={22} color="#ef4444" />
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px', color: '#ef4444' }}>Logout</span>
+              </div>
+            </>
+          ) : (
+            <Link to="/login" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', color: 'var(--store-text)', textDecoration: 'none' }}>
+              <User size={22} />
+              <span style={{ fontSize: '0.7rem', fontWeight: 600, marginTop: '2px' }}>Login</span>
+            </Link>
+          )}
         </div>
 
       </div>
@@ -91,7 +120,7 @@ const StoreNavbar = () => {
       {/* Categories Nav */}
       <nav style={{ padding: '0 5%', borderTop: '1px solid #eaeaea', display: 'flex', gap: '2rem', backgroundColor: 'white' }}>
         {['Deals', 'Tech & Gadgets', 'Sneakers', 'Apparel', 'Home', 'Beauty', 'Sports'].map(cat => (
-          <a key={cat} href="#" style={{ color: cat === 'Deals' ? 'var(--store-secondary)' : 'var(--store-text-light)', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem', padding: '1rem 0', borderBottom: '2px solid transparent' }} className="hover-lift">
+          <a key={cat} href="#" onClick={(e) => handleCategoryClick(e, cat)} style={{ color: cat === 'Deals' ? 'var(--store-secondary)' : 'var(--store-text-light)', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem', padding: '1rem 0', borderBottom: '2px solid transparent' }} className="hover-lift">
             {cat}
           </a>
         ))}

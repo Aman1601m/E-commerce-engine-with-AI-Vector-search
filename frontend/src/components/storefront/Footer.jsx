@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -21,18 +22,19 @@ const Footer = () => {
         <div>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem' }}>Make Money</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Sell on Nexus</a></li>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Become an Affiliate</a></li>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Advertise Products</a></li>
+            <li><Link to="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Sell on Nexus</Link></li>
+            <li><Link to="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Become an Affiliate</Link></li>
+            <li><Link to="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Advertise Products</Link></li>
           </ul>
         </div>
 
         <div>
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1.25rem' }}>Let Us Help</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Your Account</a></li>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Orders & Returns</a></li>
-            <li><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Help Center</a></li>
+            <li><Link to="/account" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Your Account</Link></li>
+            <li><Link to="/cart" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Your Orders (Cart)</Link></li>
+            <li><Link to="/wishlist" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Your Wishlist</Link></li>
+            <li><Link to="/" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.9rem' }}>Help Center</Link></li>
           </ul>
         </div>
       </div>

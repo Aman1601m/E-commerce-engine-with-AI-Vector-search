@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Star, Check } from 'lucide-react';
+import { ShoppingCart, Star, Check, Heart } from 'lucide-react';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../store/cartSlice';
+import { toggleWishlistItem } from '../../store/wishlistSlice';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -11,6 +12,8 @@ const ProductGrid = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,6 +39,22 @@ const ProductGrid = () => {
       image: product.thumbnail
     }));
     toast.success(`${product.name} added to cart!`, { icon: '🛒' });
+  };
+
+  const handleToggleWishlist = (e, product) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error('Please login to save items to your wishlist');
+      return;
+    }
+    const isAdded = wishlistItems.some(item => item._id === product._id);
+    dispatch(toggleWishlistItem({ productId: product._id, isAdded }));
+    
+    if (isAdded) {
+      toast.success('Removed from wishlist');
+    } else {
+      toast.success('Added to wishlist');
+    }
   };
 
   const handleCardClick = (id) => {
@@ -69,8 +88,27 @@ const ProductGrid = () => {
             )}
 
             {/* Image */}
-            <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', overflow: 'hidden' }}>
-              <img src={product.thumbnail} alt={product.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+            <div 
+              style={{ width: '100%', height: '220px', backgroundColor: '#f8f9fa', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', marginBottom: '1.25rem', position: 'relative', overflow: 'hidden' }}
+            >
+              <img 
+                src={product.thumbnail || product.images?.[0]} 
+                alt={product.name} 
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                className="product-img"
+              />
+              
+              {/* Wishlist Heart Overlay */}
+              <button 
+                onClick={(e) => handleToggleWishlist(e, product)}
+                style={{ position: 'absolute', top: '10px', right: '10px', background: 'white', border: 'none', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', zIndex: 2 }}
+              >
+                <Heart 
+                  size={18} 
+                  color={wishlistItems?.some(item => item._id === product._id) ? '#ef4444' : '#6b7280'} 
+                  fill={wishlistItems?.some(item => item._id === product._id) ? '#ef4444' : 'none'} 
+                />
+              </button>
             </div>
 
             {/* Content */}

@@ -40,6 +40,33 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    phone: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    addresses: [
+      {
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String,
+        country: String,
+        isDefault: {
+          type: Boolean,
+          default: false
+        }
+      }
+    ],
+
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      }
+    ],
+
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

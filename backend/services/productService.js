@@ -193,7 +193,7 @@ export const deleteProduct = async (id) => {
   };
 };
 
-// Sematic Product Search
+// Semantic Product Search
 export const semanticSearchProducts = async (query) => {
   if (!query) {
     throw new ApiError(400, "Search query is required");
@@ -207,34 +207,47 @@ export const semanticSearchProducts = async (query) => {
 
     if (cachedData) {
       console.log(`SEMANTIC CACHE HIT: ${cacheKey}`);
-
       return JSON.parse(cachedData);
     }
-
     console.log(`SEMANTIC CACHE MISS: ${cacheKey}`);
   }
 
-  const queryVector = await generateQueryEmbedding(query);
+  let products = [];
+  
+  // Fallback to text search if no GEMINI API key is provided
+  if (!process.env.GEMINI_API_KEY) {
+    console.log("Using text search fallback because GEMINI_API_KEY is not set.");
+    products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { category: { $regex: query, $options: 'i' } },
+        { tags: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } }
+      ]
+    }).limit(20);
+  } else {
+    const queryVector = await generateQueryEmbedding(query);
 
-  const products = await Product.aggregate([
-    {
-      $vectorSearch: {
-        index: "vector_index",
-        path: "embedding",
-        queryVector,
-        numCandidates: 100,
-        limit: 10,
-      },
-    },
-    {
-      $project: {
-        embedding: 0,
-        score: {
-          $meta: "vectorSearchScore",
+    products = await Product.aggregate([
+      {
+        $vectorSearch: {
+          index: "vector_index",
+          path: "embedding",
+          queryVector,
+          numCandidates: 100,
+          limit: 10,
         },
       },
-    },
-  ]);
+      {
+        $project: {
+          embedding: 0,
+          score: {
+            $meta: "vectorSearchScore",
+          },
+        },
+      },
+    ]);
+  }
 
   if (redisClient.isReady) {
     await redisClient.setEx(

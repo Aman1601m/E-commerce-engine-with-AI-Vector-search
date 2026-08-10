@@ -178,11 +178,21 @@ export const getDashboardStats = async (req, res) => {
 // ==============================
 export const updateProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    // Handle split name if provided from frontend
+    if (req.body.name) {
+      const nameParts = req.body.name.trim().split(' ');
+      user.firstName = nameParts[0] || user.firstName;
+      user.lastName = nameParts.slice(1).join(' ') || user.lastName;
+    }
+
+    if (req.body.firstName) user.firstName = req.body.firstName;
+    if (req.body.lastName !== undefined) user.lastName = req.body.lastName;
+    if (req.body.email) user.email = req.body.email;
+    if (req.body.phone !== undefined) user.phone = req.body.phone;
+    if (req.body.addresses) user.addresses = req.body.addresses;
 
     const updatedUser = await user.save();
     res.status(200).json({ success: true, user: updatedUser });
@@ -197,17 +207,96 @@ export const updateProfile = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    const user = await User.findById(req.user.id).select("+password");
+    const user = await User.findById(req.user._id).select("+password");
 
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) return res.status(400).json({ success: false, message: "Incorrect old password" });
 
-    user.password = newPassword; // Pre-save hook will hash it
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     res.status(200).json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==============================
+// Get Wishlist
+// ==============================
+export const getWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('wishlist');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      wishlist: user.wishlist
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==============================
+// Add to Wishlist
+// ==============================
+export const addToWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const { productId } = req.body;
+    
+    if (!user.wishlist.includes(productId)) {
+      user.wishlist.push(productId);
+      await user.save();
+    }
+
+    const populatedUser = await User.findById(req.user._id).populate('wishlist');
+
+    res.status(200).json({
+      success: true,
+      message: "Product added to wishlist",
+      wishlist: populatedUser.wishlist
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==============================
+// Remove from Wishlist
+// ==============================
+export const removeFromWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const { productId } = req.params;
+    
+    user.wishlist = user.wishlist.filter(id => id.toString() !== productId);
+    await user.save();
+
+    const populatedUser = await User.findById(req.user._id).populate('wishlist');
+
+    res.status(200).json({
+      success: true,
+      message: "Product removed from wishlist",
+      wishlist: populatedUser.wishlist
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

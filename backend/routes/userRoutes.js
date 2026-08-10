@@ -10,7 +10,10 @@ import {
   toggleUserStatus,
   getDashboardStats,
   updateProfile,
-  changePassword
+  changePassword,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -20,6 +23,11 @@ router.use(protect);
 // Self-service profile routes (Any logged-in user)
 router.put("/profile", updateProfile);
 router.put("/change-password", changePassword);
+
+// Wishlist routes
+router.get("/wishlist", getWishlist);
+router.post("/wishlist", addToWishlist);
+router.delete("/wishlist/:productId", removeFromWishlist);
 
 // Admin-only routes
 router.use(authorize("admin"));

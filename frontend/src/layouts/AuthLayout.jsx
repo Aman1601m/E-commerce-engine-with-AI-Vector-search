@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux';
 const AuthLayout = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // If already logged in, redirect to dashboard
+  // If already logged in, redirect to home
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

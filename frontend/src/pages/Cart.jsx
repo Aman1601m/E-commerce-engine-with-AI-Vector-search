@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { removeFromCart, clearCart } from '../store/cartSlice';
 import { Trash2, ArrowRight, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -17,52 +17,16 @@ const Cart = () => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(price);
   };
 
-  const handleCheckout = async () => {
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
     if (!isAuthenticated) {
-      toast.error('Please login to place an order');
+      toast.error('Please login to proceed to checkout');
+      navigate('/login');
       return;
     }
     
-    setIsCheckingOut(true);
-    try {
-      const orderData = {
-        orderItems: items.map(item => ({
-          product: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image
-        })),
-        shippingAddress: {
-          address: "123 Main St",
-          city: "Mumbai",
-          postalCode: "400001",
-          country: "India"
-        },
-        paymentMethod: "CashOnDelivery",
-        itemsPrice: totalPrice,
-        taxPrice: totalPrice * 0.18,
-        shippingPrice: 500,
-        totalPrice: totalPrice + (totalPrice * 0.18) + 500
-      };
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-
-      await axios.post('http://localhost:5000/api/orders', orderData, config);
-      
-      setOrderPlaced(true);
-      dispatch(clearCart());
-      toast.success('Order placed successfully!');
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || 'Failed to place order');
-    } finally {
-      setIsCheckingOut(false);
-    }
+    navigate('/checkout');
   };
 
   if (orderPlaced) {
