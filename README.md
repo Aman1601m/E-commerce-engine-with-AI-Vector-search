@@ -176,6 +176,18 @@ REDIS_URL=redis://localhost:6379
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 ```
 
+# 🔑 Demo Accounts
+
+To quickly test the application locally without registering, use the following credentials:
+
+**Admin Account:**
+- **Email:** `admin@nexus.com`
+- **Password:** `admin123`
+
+**Customer Account:**
+- **Email:** `user@nexus.com`
+- **Password:** `user123`
+
 ---
 
 # ▶️ Run the Project
@@ -302,38 +314,25 @@ Semantic search results are also cached for faster repeated searches.
 # 📈 Current Status
 
 ✅ Authentication
-
 ✅ Authorization
-
 ✅ Product CRUD
-
 ✅ Validation
-
 ✅ Global Error Handling
-
 ✅ Product Search
-
 ✅ Pagination
-
 ✅ Filtering
-
 ✅ Sorting
-
 ✅ Shopping Cart
-
 ✅ Orders
-
 ✅ Redis Integration
-
 ✅ Cache Aside Pattern
-
 ✅ Cache Invalidation
-
 ✅ Gemini Embeddings
-
 ✅ MongoDB Atlas Vector Search
-
 ✅ Semantic Product Search
+✅ **User Dashboard (Addresses & Order History)**
+✅ **Multi-Step Checkout Flow**
+✅ **Wishlist Functionality**
 
 ---
 
@@ -341,7 +340,6 @@ Semantic search results are also cached for faster repeated searches.
 
 - Payment Gateway Integration
 - Product Reviews
-- Wishlist
 - Coupons
 - Admin Dashboard
 - Image Upload (Cloudinary)
@@ -352,7 +350,7 @@ Semantic search results are also cached for faster repeated searches.
 
 # 👨‍💻 Developed By
 
-**Shikhar Gupta**
+**Aman Shrivastava** & **Shikhar Gupta**
 
 Project:
 **High-Performance E-Commerce Engine with AI Vector Search**
